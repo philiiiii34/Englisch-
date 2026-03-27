@@ -456,20 +456,16 @@ function hideKeyOverlay() {
 }
 async function saveKey() {
   const k = document.getElementById('keyInput').value.trim();
-  if (!k) return;
-  document.getElementById('keyError').classList.remove('on');
-  // Quick test
-  try {
-    const ok = await testKey(k);
-    if (!ok) throw new Error('invalid');
-    API_KEY = k;
-    localStorage.setItem('ec-key', k);
-    hideKeyOverlay();
-    generatePrompt();
-    generateImitationText();
-  } catch(e) {
+  if (!k || k.length < 20) {
+    document.getElementById('keyError').textContent = 'Please enter a valid API key (starts with AIza…)';
     document.getElementById('keyError').classList.add('on');
+    return;
   }
+  API_KEY = k;
+  localStorage.setItem('ec-key', k);
+  hideKeyOverlay();
+  generatePrompt();
+  generateImitationText();
 }
 async function testKey(k) {
   const res = await gemini('Say "ok" in one word.', k, 10);
