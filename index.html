@@ -439,7 +439,7 @@ function load() {
     if (r) S = {...S, ...JSON.parse(r)};
   } catch(e){}
 }
-function saveKey(k) {
+function persistKey(k) {
   try { localStorage.setItem('ec-key', k); } catch(e){}
 }
 function loadKey() {
@@ -479,9 +479,10 @@ async function testKey(k) {
 // ─── GEMINI API ──────────────────────────────────────────
 async function gemini(prompt, keyOverride, maxTokens=1000) {
   const key = keyOverride || API_KEY;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
   const res = await fetch(url, {
     method: 'POST',
+    mode: 'cors',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
       contents: [{parts:[{text: prompt}]}],
