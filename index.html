@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080810">
+<title>EnglishCoach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080810;
+  --surface: #10101e;
+  --surface2: #17172a;
+  --surface3: #1e1e35;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --gold: #c8a96e;
+  --blue: #6e9fd4;
+  --green: #7ec89a;
+  --red: #d47a7a;
+  --rose: #d49ab0;
+  --text: #ede8e0;
+  --text2: #8a8598;
+  --text3: #4a4858;
+  --r: 14px;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Outfit', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100dvh;overflow-x:hidden}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;z-index:200;background:var(–bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:opacity 0.6s ease}
+#splash.out{opacity:0;pointer-events:none}
+.splash-logo{font-family:var(–serif);font-size:2.4rem;color:var(–gold);font-weight:600}
+.splash-tagline{font-family:var(–mono);font-size:0.65rem;color:var(–text3);letter-spacing:0.18em;text-transform:uppercase}
+.splash-loader{display:flex;gap:6px;margin-top:28px}
+.splash-loader span{width:5px;height:5px;border-radius:50%;background:var(–gold);opacity:0.2;animation:ldot 1.2s ease infinite}
+.splash-loader span:nth-child(2){animation-delay:0.2s}
+.splash-loader span:nth-child(3){animation-delay:0.4s}
+@keyframes ldot{0%,100%{opacity:0.2;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+
+/* KEY SETUP OVERLAY */
+#keyOverlay{position:fixed;inset:0;z-index:150;background:var(–bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;gap:0}
+#keyOverlay.hidden{display:none}
+.key-logo{font-family:var(–serif);font-size:2rem;color:var(–gold);font-weight:600;margin-bottom:6px}
+.key-sub{font-family:var(–mono);font-size:0.62rem;color:var(–text3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:32px}
+.key-card{background:var(–surface);border:1px solid var(–border2);border-radius:var(–r);padding:22px;width:100%;max-width:380px}
+.key-title{font-family:var(–serif);font-size:1.3rem;font-weight:600;color:var(–text);margin-bottom:8px}
+.key-desc{font-size:0.82rem;color:var(–text2);line-height:1.6;margin-bottom:20px}
+.key-steps{background:var(–surface2);border-radius:10px;padding:14px;margin-bottom:20px}
+.key-step{font-size:0.8rem;color:var(–text2);line-height:1.7;padding-left:4px}
+.key-step a{color:var(–gold);text-decoration:none}
+.key-input-wrap{margin-bottom:14px}
+.key-label{font-family:var(–mono);font-size:0.62rem;color:var(–text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:7px}
+.key-input{width:100%;background:var(–surface2);border:1px solid var(–border2);border-radius:10px;color:var(–text);font-family:var(–mono);font-size:0.82rem;padding:12px 14px;outline:none;-webkit-appearance:none;transition:border-color 0.2s}
+.key-input:focus{border-color:rgba(200,169,110,0.4)}
+.key-input::placeholder{color:var(–text3)}
+.key-note{font-size:0.75rem;color:var(–text3);line-height:1.5;margin-bottom:18px}
+.key-note a{color:var(–gold);text-decoration:none}
+
+/* LAYOUT */
+.app{display:flex;flex-direction:column;min-height:100dvh}
+header{position:sticky;top:0;z-index:50;background:rgba(8,8,16,0.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(–border);padding:13px 18px 11px;display:flex;align-items:center;justify-content:space-between}
+.h-logo{font-family:var(–serif);font-size:1.2rem;color:var(–gold);font-weight:600}
+.h-right{display:flex;align-items:center;gap:8px}
+.h-badge{font-family:var(–mono);font-size:0.62rem;color:var(–text3);background:var(–surface2);padding:4px 10px;border-radius:20px;border:1px solid var(–border)}
+.h-key-btn{font-family:var(–mono);font-size:0.62rem;color:var(–text3);background:none;border:none;cursor:pointer;padding:4px 6px;opacity:0.6}
+.h-key-btn:active{opacity:1}
+main{flex:1;padding-bottom:80px}
+
+/* NAV */
+nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(8,8,16,0.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(–border);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;gap:3px;border:none;background:none;color:var(–text3);cursor:pointer;transition:color 0.2s;font-family:var(–sans)}
+.nb.active{color:var(–gold)}
+.nb-icon{font-size:1.25rem;line-height:1}
+.nb-label{font-size:0.6rem;letter-spacing:0.06em;text-transform:uppercase}
+
+/* SCREENS */
+.screen{display:none;padding:18px;animation:fadeUp 0.3s ease}
+.screen.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:var(–surface);border:1px solid var(–border);border-radius:var(–r);padding:18px;margin-bottom:14px}
+.lbl{font-family:var(–mono);font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(–text3);margin-bottom:8px}
+
+/* TOPIC CHIPS */
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:14px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:5px 13px;border-radius:20px;font-size:0.76rem;cursor:pointer;border:1px solid var(–border);background:var(–surface2);color:var(–text2);transition:all 0.2s;font-family:var(–sans)}
+.chip.sel{background:rgba(200,169,110,0.18);color:var(–gold);border-color:rgba(200,169,110,0.35)}
+.chip.erotic{border-color:rgba(212,154,176,0.3);color:var(–rose)}
+.chip.erotic.sel{background:rgba(212,154,176,0.18);border-color:rgba(212,154,176,0.45)}
+
+/* PROMPT */
+.prompt-box{background:var(–surface2);border-radius:10px;padding:15px;margin-bottom:14px;border-left:3px solid var(–gold)}
+.prompt-text{font-family:var(–serif);font-size:1.05rem;line-height:1.7;color:var(–text);font-style:italic}
+
+/* TEXTAREA */
+textarea{width:100%;min-height:150px;background:var(–surface2);border:1px solid var(–border);border-radius:10px;color:var(–text);font-family:var(–sans);font-size:0.93rem;line-height:1.6;padding:13px 15px;resize:none;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+textarea:focus{border-color:rgba(200,169,110,0.35)}
+textarea::placeholder{color:var(–text3)}
+.wc{font-family:var(–mono);font-size:0.68rem;color:var(–text3);text-align:right;margin-top:5px}
+.wc span{color:var(–blue)}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px;border-radius:11px;border:none;font-family:var(–sans);font-size:0.88rem;font-weight:500;cursor:pointer;transition:all 0.18s}
+.btn-gold{background:var(–gold);color:#1a1408}
+.btn-gold:active{transform:scale(0.98);opacity:0.88}
+.btn-gold:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+.btn-dim{background:var(–surface2);color:var(–text2);border:1px solid var(–border);margin-top:9px}
+.btn-dim:active{transform:scale(0.98)}
+.btn-sm{padding:8px 14px;width:auto;font-size:0.78rem}
+
+/* LOADING */
+.spin-row{display:none;align-items:center;justify-content:center;gap:9px;padding:18px;color:var(–text3);font-family:var(–mono);font-size:0.78rem}
+.spin-row.on{display:flex}
+.spin{width:15px;height:15px;border:2px solid var(–border2);border-top-color:var(–gold);border-radius:50%;animation:spin 0.7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* FEEDBACK */
+.fb-box{display:none;margin-top:14px}
+.fb-box.on{display:block}
+.fb-section{background:var(–surface2);border:1px solid var(–border);border-radius:12px;padding:16px;margin-bottom:10px}
+.fb-tag{display:inline-flex;align-items:center;gap:5px;font-family:var(–mono);font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;padding:3px 10px;border-radius:20px;margin-bottom:11px}
+.ft-score{background:rgba(200,169,110,0.12);color:var(–gold);border:1px solid rgba(200,169,110,0.22)}
+.ft-err{background:rgba(212,119,122,0.12);color:var(–red);border:1px solid rgba(212,119,122,0.22)}
+.ft-style{background:rgba(110,159,212,0.12);color:var(–blue);border:1px solid rgba(110,159,212,0.22)}
+.ft-vocab{background:rgba(126,200,154,0.12);color:var(–green);border:1px solid rgba(126,200,154,0.22)}
+.score-big{font-family:var(–serif);font-size:2.8rem;font-weight:600;color:var(–gold);text-align:center;margin:6px 0 3px;line-height:1}
+.score-sub{font-family:var(–mono);font-size:0.65rem;color:var(–text3);text-align:center;letter-spacing:0.1em}
+.fb-content{font-size:0.85rem;line-height:1.68;color:var(–text2)}
+.fb-content strong{color:var(–text)}
+.save-btn-row{display:flex;justify-content:flex-end;margin-top:10px}
+
+/* IMITATION */
+.steps{display:flex;gap:7px;margin-bottom:14px}
+.step{flex:1;padding:7px 3px;text-align:center;border-radius:8px;font-size:0.65rem;font-family:var(–mono);letter-spacing:0.07em;border:1px solid var(–border);color:var(–text3);background:var(–surface2);transition:all 0.25s}
+.step.active{background:rgba(200,169,110,0.12);color:var(–gold);border-color:rgba(200,169,110,0.28)}
+.step.done{background:rgba(126,200,154,0.1);color:var(–green);border-color:rgba(126,200,154,0.22)}
+.source-text{font-family:var(–serif);font-size:0.98rem;line-height:1.82;color:var(–text2);padding:15px;background:var(–surface2);border-left:3px solid var(–gold);border-radius:0 10px 10px 0;margin-bottom:14px}
+
+/* PROGRESS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:var(–surface2);border-radius:12px;padding:15px;border:1px solid var(–border);text-align:center}
+.stat-val{font-family:var(–serif);font-size:2rem;font-weight:600;color:var(–gold);line-height:1;margin-bottom:5px}
+.stat-lbl{font-family:var(–mono);font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(–text3)}
+.pb-wrap{margin-bottom:10px}
+.pb-labels{display:flex;justify-content:space-between;font-family:var(–mono);font-size:0.68rem;color:var(–text3);margin-bottom:5px}
+.pb-track{background:var(–surface3);border-radius:4px;height:5px;overflow:hidden}
+.pb-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(–blue),var(–gold));transition:width 0.9s cubic-bezier(.34,1.56,.64,1)}
+.hist-item{padding:13px 0;border-bottom:1px solid var(–border);display:flex;align-items:center;justify-content:space-between}
+.hist-item:last-child{border-bottom:none}
+.hist-type{font-family:var(–mono);font-size:0.62rem;color:var(–text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:2px}
+.hist-prev{font-size:0.82rem;color:var(–text2);line-height:1.4}
+.hist-score{font-family:var(–serif);font-size:1.3rem;font-weight:600;color:var(–gold);flex-shrink:0;margin-left:12px}
+.empty{text-align:center;padding:36px 20px;color:var(–text3);font-family:var(–mono);font-size:0.78rem}
+.empty-i{font-size:1.8rem;margin-bottom:10px;opacity:0.35}
+
+/* CORRECTIONS */
+.correction-item{background:var(–surface2);border-radius:12px;padding:15px;margin-bottom:10px;border:1px solid var(–border)}
+.ci-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ci-date{font-family:var(–mono);font-size:0.62rem;color:var(–text3)}
+.ci-score{font-family:var(–serif);font-size:1.1rem;font-weight:600;color:var(–gold)}
+.ci-topic{font-family:var(–mono);font-size:0.62rem;color:var(–text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em}
+.ci-section{margin-bottom:10px}
+.ci-section:last-child{margin-bottom:0}
+.ci-slabel{font-family:var(–mono);font-size:0.6rem;color:var(–text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px}
+.ci-content{font-size:0.82rem;line-height:1.6;color:var(–text2)}
+.ci-content strong{color:var(–text)}
+.del-btn{background:none;border:none;color:var(–text3);cursor:pointer;font-size:0.8rem;padding:2px 6px;border-radius:6px;font-family:var(–mono)}
+
+/* TABS */
+.tab-row{display:flex;gap:0;margin-bottom:16px;background:var(–surface2);border-radius:10px;padding:3px;border:1px solid var(–border)}
+.tab{flex:1;padding:8px;text-align:center;border-radius:8px;font-family:var(–mono);font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(–text3);cursor:pointer;transition:all 0.2s;border:none;background:none}
+.tab.active{background:var(–surface);color:var(–text);border:1px solid var(–border)}
+
+/* HOME */
+.hero{padding:26px 18px 18px;border-bottom:1px solid var(–border)}
+.hero-greet{font-family:var(–mono);font-size:0.65rem;color:var(–text3);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:7px}
+.hero-h{font-family:var(–serif);font-size:1.7rem;font-weight:600;line-height:1.2;color:var(–text)}
+.hero-h em{color:var(–gold);font-style:normal}
+.streak-row{display:flex;align-items:center;gap:5px;margin-top:15px;flex-wrap:wrap}
+.s-dot{width:26px;height:5px;border-radius:3px;background:var(–surface3);border:1px solid var(–border);display:inline-block;transition:background 0.3s}
+.s-dot.on{background:var(–gold);border-color:var(–gold)}
+.s-label{font-family:var(–mono);font-size:0.6rem;color:var(–text3);margin-left:4px}
+.qa{padding:18px;display:flex;flex-direction:column;gap:10px}
+.qb{display:flex;align-items:center;gap:14px;padding:16px 18px;background:var(–surface);border:1px solid var(–border);border-radius:var(–r);cursor:pointer;transition:all 0.2s}
+.qb:active{transform:scale(0.98);background:var(–surface2)}
+.qi{font-size:1.4rem;flex-shrink:0}
+.qt h3{font-size:0.92rem;font-weight:500;color:var(–text);margin-bottom:2px}
+.qt p{font-size:0.75rem;color:var(–text3);line-height:1.4}
+.qa-arr{margin-left:auto;color:var(–text3)}
+.divider{height:1px;background:var(–border);margin:14px 0}
+
+/* ERROR BOX */
+.err-box{background:rgba(212,119,122,0.1);border:1px solid rgba(212,119,122,0.2);border-radius:10px;padding:12px 14px;font-size:0.82rem;color:var(–red);line-height:1.5;margin-top:12px;display:none}
+.err-box.on{display:block}
+</style>
+
+</head>
+<body>
+
+<!-- SPLASH -->
+
+<div id="splash">
+  <div class="splash-logo">EnglishCoach</div>
+  <div class="splash-tagline">C1 · C2 · Advanced</div>
+  <div class="splash-loader"><span></span><span></span><span></span></div>
+</div>
+
+<!-- API KEY SETUP -->
+
+<div id="keyOverlay" class="hidden">
+  <div class="key-logo">EnglishCoach</div>
+  <div class="key-sub">One-time setup</div>
+  <div class="key-card">
+    <div class="key-title">Connect your AI</div>
+    <div class="key-desc">This app uses Google Gemini to analyse your writing. You need a free API key — no credit card required.</div>
+    <div class="key-steps">
+      <div class="key-step">1. Go to <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></div>
+      <div class="key-step">2. Sign in with your Google account</div>
+      <div class="key-step">3. Click <strong>"Get API Key"</strong> → <strong>"Create API key"</strong></div>
+      <div class="key-step">4. Copy and paste it below</div>
+    </div>
+    <div class="key-input-wrap">
+      <div class="key-label">Your Gemini API Key</div>
+      <input type="password" class="key-input" id="keyInput" placeholder="AIza…" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="key-note">Your key is stored only on this device. It is never sent anywhere except directly to Google's API.</div>
+    <button class="btn btn-gold" onclick="saveKey()">Save & Start</button>
+    <div class="err-box" id="keyError">Could not connect. Please check your key and try again.</div>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="h-logo">EnglishCoach</div>
+    <div class="h-right">
+      <div class="h-badge" id="hBadge">Session 1</div>
+      <button class="h-key-btn" onclick="showKeyOverlay()" title="Change API Key">🔑</button>
+    </div>
+  </header>
+  <main>
+
+```
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="hero">
+    <div class="hero-greet">Ready to train</div>
+    <div class="hero-h">Write. <em>Refine.</em><br>Get sharper.</div>
+    <div class="streak-row">
+      <div id="streakDots"></div>
+      <div class="s-label" id="streakLabel">0 day streak</div>
+    </div>
+  </div>
+  <div class="qa">
+    <div class="qb" onclick="goTo('write')">
+      <div class="qi">✍️</div>
+      <div class="qt"><h3>Free Writing</h3><p>AI-generated prompt · full correction & feedback</p></div>
+      <div class="qa-arr">›</div>
+    </div>
+    <div class="qb" onclick="goTo('imitation')">
+      <div class="qi">📖</div>
+      <div class="qt"><h3>Imitation Writing</h3><p>Read, recall, rewrite · master editorial style</p></div>
+      <div class="qa-arr">›</div>
+    </div>
+    <div class="qb" onclick="goTo('progress')">
+      <div class="qi">◎</div>
+      <div class="qt"><h3>Progress & Corrections</h3><p>Scores, history, saved feedback</p></div>
+      <div class="qa-arr">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- WRITE -->
+<div class="screen" id="screen-write">
+  <div class="card">
+    <div class="lbl">Topic</div>
+    <div class="chips" id="topicChips"></div>
+    <div class="lbl">Prompt</div>
+    <div class="prompt-box">
+      <div class="spin-row on" id="promptLoading" style="padding:4px 0"><div class="spin"></div><span>Generating…</span></div>
+      <div class="prompt-text" id="promptText" style="display:none"></div>
+    </div>
+    <button class="btn btn-dim btn-sm" onclick="generatePrompt()">↻ New prompt</button>
+  </div>
+  <div class="card">
+    <div class="lbl">Your response · 150–200 words</div>
+    <textarea id="writeInput" placeholder="Start writing here…" oninput="updateWC()"></textarea>
+    <div class="wc"><span id="wc">0</span> / 200 words</div>
+  </div>
+  <button class="btn btn-gold" id="analyzeBtn" onclick="analyzeWriting()" disabled>Analyse & Correct</button>
+  <div class="spin-row" id="writeLoading"><div class="spin"></div><span>Analysing your writing…</span></div>
+  <div class="err-box" id="writeError"></div>
+  <div class="fb-box" id="writeFeedback">
+    <div class="fb-section">
+      <div class="fb-tag ft-score">⭐ Overall Score</div>
+      <div class="score-big" id="writeScore">—</div>
+      <div class="score-sub">out of 10</div>
+    </div>
+    <div class="fb-section">
+      <div class="fb-tag ft-err">⚠ Errors & Corrections</div>
+      <div class="fb-content" id="fbErrors"></div>
+    </div>
+    <div class="fb-section">
+      <div class="fb-tag ft-style">✦ Style & Register</div>
+      <div class="fb-content" id="fbStyle"></div>
+    </div>
+    <div class="fb-section">
+      <div class="fb-tag ft-vocab">◈ Vocabulary Upgrades</div>
+      <div class="fb-content" id="fbVocab"></div>
+    </div>
+    <div class="save-btn-row">
+      <button class="btn btn-dim btn-sm" id="saveBtn" onclick="saveCorrection()">💾 Save to My Corrections</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMITATION -->
+<div class="screen" id="screen-imitation">
+  <div class="steps">
+    <div class="step active" id="ist1">1 · Read</div>
+    <div class="step" id="ist2">2 · Write</div>
+    <div class="step" id="ist3">3 · Compare</div>
+  </div>
+  <div id="iStep1">
+    <div class="card">
+      <div class="lbl">Source text — read carefully</div>
+      <div class="spin-row on" id="iSourceLoading" style="padding:8px 0"><div class="spin"></div><span>Generating text…</span></div>
+      <div class="source-text" id="iSource" style="display:none"></div>
+    </div>
+    <button class="btn btn-gold" onclick="iStartWrite()">I've read it — hide & write</button>
+    <button class="btn btn-dim" onclick="generateImitationText()">↻ New text</button>
+  </div>
+  <div id="iStep2" style="display:none">
+    <div class="card">
+      <div class="lbl">Recreate from memory</div>
+      <p style="font-size:0.8rem;color:var(--text3);margin-bottom:12px;line-height:1.5">Don't copy exactly — write what you remember, in your own words.</p>
+      <textarea id="iInput" placeholder="Write your version here…"></textarea>
+    </div>
+    <button class="btn btn-gold" onclick="compareImitation()">Compare & Get Feedback</button>
+    <button class="btn btn-dim" onclick="iShowSource()">↩ Show original again</button>
+  </div>
+  <div id="iStep3" style="display:none">
+    <div class="card">
+      <div class="lbl">Original text</div>
+      <div class="source-text" id="iSourceRepeat"></div>
+    </div>
+    <div class="spin-row" id="iLoading"><div class="spin"></div><span>Comparing texts…</span></div>
+    <div class="err-box" id="iError"></div>
+    <div class="fb-box" id="iFeedback">
+      <div class="fb-section">
+        <div class="fb-tag ft-score">⭐ Similarity Score</div>
+        <div class="score-big" id="iScore">—</div>
+        <div class="score-sub">out of 10</div>
+      </div>
+      <div class="fb-section">
+        <div class="fb-tag ft-style">✦ What you captured well</div>
+        <div class="fb-content" id="iGood"></div>
+      </div>
+      <div class="fb-section">
+        <div class="fb-tag ft-vocab">◈ What the original does better</div>
+        <div class="fb-content" id="iBetter"></div>
+      </div>
+      <div class="save-btn-row">
+        <button class="btn btn-dim btn-sm" onclick="saveImitationCorrection()">💾 Save to My Corrections</button>
+      </div>
+    </div>
+    <button class="btn btn-dim" onclick="resetImitation()" style="margin-top:14px">↻ New exercise</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="screen" id="screen-progress">
+  <div class="tab-row">
+    <button class="tab active" id="tab-stats" onclick="switchTab('stats')">Stats</button>
+    <button class="tab" id="tab-corrections" onclick="switchTab('corrections')">My Corrections</button>
+  </div>
+  <div id="tabStats">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="stSessions">0</div><div class="stat-lbl">Sessions</div></div>
+      <div class="stat-card"><div class="stat-val" id="stAvg">—</div><div class="stat-lbl">Avg Score</div></div>
+      <div class="stat-card"><div class="stat-val" id="stWords">0</div><div class="stat-lbl">Words</div></div>
+      <div class="stat-card"><div class="stat-val" id="stStreak">0</div><div class="stat-lbl">Streak</div></div>
+    </div>
+    <div class="card">
+      <div class="lbl">Last 5 scores</div>
+      <div id="scoreGraph"></div>
+    </div>
+    <div class="card">
+      <div class="lbl">History</div>
+      <div id="histList"></div>
+    </div>
+    <button class="btn btn-dim" onclick="clearAll()" style="margin-top:4px;font-size:0.75rem;opacity:0.5">Clear all data</button>
+  </div>
+  <div id="tabCorrections" style="display:none">
+    <div id="correctionsList"></div>
+  </div>
+</div>
+```
+
+  </main>
+  <nav>
+    <button class="nb active" id="nav-home" onclick="goTo('home')"><div class="nb-icon">⌂</div><div class="nb-label">Home</div></button>
+    <button class="nb" id="nav-write" onclick="goTo('write')"><div class="nb-icon">✍</div><div class="nb-label">Write</div></button>
+    <button class="nb" id="nav-imitation" onclick="goTo('imitation')"><div class="nb-icon">📖</div><div class="nb-label">Imitate</div></button>
+    <button class="nb" id="nav-progress" onclick="goTo('progress')"><div class="nb-icon">◎</div><div class="nb-label">Progress</div></button>
+  </nav>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let S = {
+  sessions: [], corrections: [],
+  streak: 0, lastDate: null,
+  topic: 'Opinion',
+  currentPrompt: '', currentFeedback: null,
+  imitationText: '', imitationStyle: '',
+  currentImitFeedback: null
+};
+let API_KEY = '';
+
+const TOPICS = ['Opinion','Society','Technology','Culture','Work','Environment','Psychology','Erotic'];
+
+// ─── STORAGE (localStorage for GitHub Pages) ─────────────
+function save() {
+  try { localStorage.setItem('ec-state', JSON.stringify(S)); } catch(e){}
+}
+function load() {
+  try {
+    const r = localStorage.getItem('ec-state');
+    if (r) S = {...S, ...JSON.parse(r)};
+  } catch(e){}
+}
+function saveKey(k) {
+  try { localStorage.setItem('ec-key', k); } catch(e){}
+}
+function loadKey() {
+  try { return localStorage.getItem('ec-key') || ''; } catch(e){ return ''; }
+}
+
+// ─── KEY SETUP ───────────────────────────────────────────
+function showKeyOverlay() {
+  document.getElementById('keyOverlay').classList.remove('hidden');
+  document.getElementById('keyInput').value = API_KEY;
+}
+function hideKeyOverlay() {
+  document.getElementById('keyOverlay').classList.add('hidden');
+}
+async function saveKey() {
+  const k = document.getElementById('keyInput').value.trim();
+  if (!k) return;
+  document.getElementById('keyError').classList.remove('on');
+  // Quick test
+  try {
+    const ok = await testKey(k);
+    if (!ok) throw new Error('invalid');
+    API_KEY = k;
+    localStorage.setItem('ec-key', k);
+    hideKeyOverlay();
+    generatePrompt();
+    generateImitationText();
+  } catch(e) {
+    document.getElementById('keyError').classList.add('on');
+  }
+}
+async function testKey(k) {
+  const res = await gemini('Say "ok" in one word.', k, 10);
+  return res && res.length > 0;
+}
+
+// ─── GEMINI API ──────────────────────────────────────────
+async function gemini(prompt, keyOverride, maxTokens=1000) {
+  const key = keyOverride || API_KEY;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      contents: [{parts:[{text: prompt}]}],
+      generationConfig: {maxOutputTokens: maxTokens, temperature: 0.7}
+    })
+  });
+  const d = await res.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function parseJSON(raw) {
+  const clean = raw.replace(/```json|```/g,'').trim();
+  // Find first { to last }
+  const start = clean.indexOf('{');
+  const end = clean.lastIndexOf('}');
+  return JSON.parse(clean.slice(start, end+1));
+}
+
+// ─── NAV ─────────────────────────────────────────────────
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  if (id==='progress') renderProgress();
+}
+function switchTab(t) {
+  document.getElementById('tabStats').style.display = t==='stats'?'block':'none';
+  document.getElementById('tabCorrections').style.display = t==='corrections'?'block':'none';
+  document.getElementById('tab-stats').classList.toggle('active',t==='stats');
+  document.getElementById('tab-corrections').classList.toggle('active',t==='corrections');
+  if (t==='corrections') renderCorrections();
+}
+
+// ─── TOPICS ──────────────────────────────────────────────
+function renderTopicChips() {
+  document.getElementById('topicChips').innerHTML = TOPICS.map(t =>
+    `<div class="chip ${t===S.topic?'sel':''} ${t==='Erotic'?'erotic':''}" onclick="selectTopic('${t}')">${t}</div>`
+  ).join('');
+}
+function selectTopic(t) {
+  S.topic = t; renderTopicChips(); generatePrompt();
+}
+
+// ─── PROMPTS ─────────────────────────────────────────────
+async function generatePrompt() {
+  document.getElementById('promptLoading').classList.add('on');
+  document.getElementById('promptText').style.display = 'none';
+  document.getElementById('writeFeedback').classList.remove('on');
+  document.getElementById('writeInput').value = '';
+  document.getElementById('wc').textContent = '0';
+  document.getElementById('analyzeBtn').disabled = true;
+
+  const isErotic = S.topic === 'Erotic';
+  const prompt = `Generate ONE writing prompt for an advanced C1/C2 English learner (native German speaker, English teacher).
+Topic: ${S.topic}${isErotic ? '. Make it a sophisticated, literary prompt about desire, intimacy or sensuality — tasteful, not explicit, in the style of a literary magazine.' : ''}
+The prompt should be thought-provoking, specific, invite personal reflection. 2-3 sentences. Return ONLY the prompt text, nothing else.`;
+
+  try {
+    const text = await gemini(prompt, null, 150);
+    S.currentPrompt = text.trim();
+    document.getElementById('promptText').textContent = S.currentPrompt;
+    document.getElementById('promptText').style.display = 'block';
+  } catch(e) {
+    document.getElementById('promptText').textContent = 'Could not generate prompt. Check your API key (🔑 top right).';
+    document.getElementById('promptText').style.display = 'block';
+  }
+  document.getElementById('promptLoading').classList.remove('on');
+}
+
+// ─── WORD COUNT ──────────────────────────────────────────
+function updateWC() {
+  const t = document.getElementById('writeInput').value.trim();
+  const n = t ? t.split(/\s+/).length : 0;
+  document.getElementById('wc').textContent = n;
+  document.getElementById('analyzeBtn').disabled = n < 80;
+}
+
+// ─── WRITING ANALYSIS ────────────────────────────────────
+async function analyzeWriting() {
+  const text = document.getElementById('writeInput').value.trim();
+  if (!text) return;
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('writeLoading').classList.add('on');
+  document.getElementById('writeFeedback').classList.remove('on');
+  document.getElementById('writeError').classList.remove('on');
+
+  const sn = S.sessions.length + 1;
+  const prompt = `You are an expert English language coach for a native German speaker who is a qualified English teacher, C1/C2 level. This is session #${sn} — be progressively more demanding and precise as session number increases.
+
+Analyse this writing sample and respond ONLY with a valid JSON object (no markdown, no code fences, no extra text):
+{"score":<integer 1-10>,"errors":"<HTML string: list each error as: <strong>original phrase</strong> → <strong>corrected</strong> — brief explanation why. If no errors write 'No significant errors — excellent work.'>","style":"<HTML string: 2-3 specific observations about register, sentence variety, cohesion, tone. Be concrete.>","vocab":"<HTML string: 3-4 vocabulary upgrades formatted as: <strong>word used</strong> → <strong>better C1/C2 option</strong> — brief context note>"}
+
+Prompt the student was responding to: "${S.currentPrompt}"
+
+Student's writing (${text.split(/\s+/).length} words):
+${text}`;
+
+  try {
+    const raw = await gemini(prompt, null, 1000);
+    const p = parseJSON(raw);
+    document.getElementById('writeScore').textContent = p.score+'/10';
+    document.getElementById('fbErrors').innerHTML = p.errors;
+    document.getElementById('fbStyle').innerHTML = p.style;
+    document.getElementById('fbVocab').innerHTML = p.vocab;
+    document.getElementById('writeFeedback').classList.add('on');
+
+    S.currentFeedback = {type:'writing', score:p.score, topic:S.topic, prompt:S.currentPrompt, text, errors:p.errors, style:p.style, vocab:p.vocab, date:new Date().toISOString()};
+    S.sessions.push({type:'writing', date:new Date().toISOString(), topic:S.topic, score:p.score, words:text.split(/\s+/).length, preview:text.slice(0,65)+'…'});
+    bumpStreak(); save(); updateHeader();
+    document.getElementById('saveBtn').textContent = '💾 Save to My Corrections';
+    document.getElementById('saveBtn').disabled = false;
+  } catch(e) {
+    document.getElementById('writeError').textContent = 'Error: ' + e.message + '. Check your API key (🔑).';
+    document.getElementById('writeError').classList.add('on');
+  }
+  document.getElementById('writeLoading').classList.remove('on');
+  document.getElementById('analyzeBtn').disabled = false;
+}
+
+// ─── SAVE CORRECTIONS ────────────────────────────────────
+function saveCorrection() {
+  if (!S.currentFeedback) return;
+  S.corrections.unshift({...S.currentFeedback, id: Date.now()});
+  save();
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = '✓ Saved!'; btn.disabled = true;
+  setTimeout(()=>{btn.textContent='💾 Save to My Corrections';btn.disabled=false;},2000);
+}
+function saveImitationCorrection() {
+  if (!S.currentImitFeedback) return;
+  S.corrections.unshift({...S.currentImitFeedback, id: Date.now()});
+  save();
+}
+
+// ─── IMITATION ───────────────────────────────────────────
+async function generateImitationText() {
+  document.getElementById('iSourceLoading').classList.add('on');
+  document.getElementById('iSource').style.display = 'none';
+
+  const styles = ['The Economist','The Atlantic','The Guardian','Aeon','The New Yorker'];
+  const style = styles[Math.floor(Math.random()*styles.length)];
+  const topics = ['expertise and mastery','urban life and anonymity','technology and cognition','language and perception','time and attention','work and meaning','solitude and connection','memory and identity','sleep and recovery','curiosity and learning'];
+  const topic = topics[Math.floor(Math.random()*topics.length)];
+
+  const prompt = `Write a short passage of 3-5 sentences (~80-100 words) in the precise editorial style of ${style} about: ${topic}.
+Use sophisticated vocabulary, varied sentence rhythm, precise word choice, and the register of quality long-form journalism. Make it genuinely elegant.
+Return ONLY the passage text. No title, no label, no explanation, no quotes around it.`;
+
+  try {
+    const text = await gemini(prompt, null, 250);
+    S.imitationText = text.trim();
+    S.imitationStyle = style;
+    document.getElementById('iSource').innerHTML = `<span style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);font-style:normal;display:block;margin-bottom:10px">Style: ${style} · Topic: ${topic}</span>${S.imitationText}`;
+    document.getElementById('iSource').style.display = 'block';
+  } catch(e) {
+    document.getElementById('iSource').innerHTML = 'Error generating text. Check your API key (🔑).';
+    document.getElementById('iSource').style.display = 'block';
+  }
+  document.getElementById('iSourceLoading').classList.remove('on');
+}
+
+function iStartWrite() {
+  document.getElementById('iStep1').style.display='none';
+  document.getElementById('iStep2').style.display='block';
+  document.getElementById('iInput').value='';
+  setSteps(2);
+}
+function iShowSource() {
+  document.getElementById('iStep2').style.display='none';
+  document.getElementById('iStep1').style.display='block';
+  setSteps(1);
+}
+function setSteps(n) {
+  ['ist1','ist2','ist3'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.classList.remove('active','done');
+    if(i+1<n) el.classList.add('done');
+    else if(i+1===n) el.classList.add('active');
+  });
+}
+
+async function compareImitation() {
+  const attempt = document.getElementById('iInput').value.trim();
+  if (!attempt) return;
+  document.getElementById('iStep2').style.display='none';
+  document.getElementById('iStep3').style.display='block';
+  setSteps(3);
+  document.getElementById('iSourceRepeat').textContent = S.imitationText;
+  document.getElementById('iLoading').classList.add('on');
+  document.getElementById('iFeedback').classList.remove('on');
+  document.getElementById('iError').classList.remove('on');
+
+  const prompt = `You are an expert writing coach. Compare a student's recall attempt to the original passage.
+Respond ONLY with a valid JSON object (no markdown, no code fences):
+{"score":<integer 1-10, measuring how well they captured meaning, tone and style>,"good":"<HTML: 2-3 specific phrases or structures the student captured well>","better":"<HTML: 2-3 specific techniques in the original the student missed — exact phrasing, rhythm, word choice examples>"}
+
+Original passage:
+"${S.imitationText}"
+
+Student's version:
+"${attempt}"`;
+
+  try {
+    const raw = await gemini(prompt, null, 600);
+    const p = parseJSON(raw);
+    document.getElementById('iScore').textContent = p.score+'/10';
+    document.getElementById('iGood').innerHTML = p.good;
+    document.getElementById('iBetter').innerHTML = p.better;
+    document.getElementById('iFeedback').classList.add('on');
+    S.currentImitFeedback = {type:'imitation', score:p.score, style:S.imitationStyle, original:S.imitationText, attempt, good:p.good, better:p.better, date:new Date().toISOString()};
+    S.sessions.push({type:'imitation', date:new Date().toISOString(), score:p.score, words:attempt.split(/\s+/).length, preview:attempt.slice(0,65)+'…'});
+    bumpStreak(); save(); updateHeader();
+  } catch(e) {
+    document.getElementById('iError').textContent = 'Error: '+e.message;
+    document.getElementById('iError').classList.add('on');
+  }
+  document.getElementById('iLoading').classList.remove('on');
+}
+
+function resetImitation() {
+  document.getElementById('iStep3').style.display='none';
+  document.getElementById('iStep1').style.display='block';
+  document.getElementById('iFeedback').classList.remove('on');
+  setSteps(1);
+  generateImitationText();
+}
+
+// ─── PROGRESS ────────────────────────────────────────────
+function renderProgress() {
+  const ss = S.sessions||[];
+  const scored = ss.filter(s=>s.score);
+  const avg = scored.length?(scored.reduce((a,b)=>a+b.score,0)/scored.length).toFixed(1):'—';
+  const words = ss.reduce((a,b)=>a+(b.words||0),0);
+  document.getElementById('stSessions').textContent=ss.length;
+  document.getElementById('stAvg').textContent=avg;
+  document.getElementById('stWords').textContent=words>999?(words/1000).toFixed(1)+'k':words;
+  document.getElementById('stStreak').textContent=S.streak||0;
+  const last5=scored.slice(-5);
+  document.getElementById('scoreGraph').innerHTML=last5.length?last5.map(s=>`
+    <div class="pb-wrap">
+      <div class="pb-labels"><span>${s.type==='writing'?'✍':'📖'} ${s.topic||''}</span><span style="color:var(--gold)">${s.score}/10</span></div>
+      <div class="pb-track"><div class="pb-fill" style="width:${s.score*10}%"></div></div>
+    </div>`).join(''):'<div style="font-family:var(--mono);font-size:0.72rem;color:var(--text3)">No sessions yet</div>';
+  document.getElementById('histList').innerHTML=ss.length?ss.slice().reverse().slice(0,8).map(s=>`
+    <div class="hist-item">
+      <div>
+        <div class="hist-type">${s.type==='writing'?'✍ Free Writing':'📖 Imitation'} · ${new Date(s.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+        <div class="hist-prev">${s.preview}</div>
+      </div>
+      ${s.score?`<div class="hist-score">${s.score}</div>`:''}
+    </div>`).join(''):'<div class="empty"><div class="empty-i">📝</div>No sessions yet.</div>';
+}
+
+function renderCorrections() {
+  const el=document.getElementById('correctionsList');
+  if(!S.corrections||S.corrections.length===0){
+    el.innerHTML='<div class="empty"><div class="empty-i">💾</div>No saved corrections yet.<br>After an analysis, tap "Save to My Corrections".</div>';return;
+  }
+  el.innerHTML=S.corrections.map(c=>`
+    <div class="correction-item" id="ci-${c.id}">
+      <div class="ci-header">
+        <div class="ci-date">${new Date(c.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${c.score?`<div class="ci-score">${c.score}/10</div>`:''}
+          <button class="del-btn" onclick="deleteCorrection(${c.id})">✕</button>
+        </div>
+      </div>
+      <div class="ci-topic">${c.type==='writing'?'✍':'📖'} ${c.topic||c.style||''}</div>
+      ${c.errors?`<div class="ci-section"><div class="ci-slabel">⚠ Errors</div><div class="ci-content">${c.errors}</div></div>`:''}
+      ${c.style||c.good?`<div class="ci-section"><div class="ci-slabel">✦ ${c.type==='writing'?'Style':'Captured well'}</div><div class="ci-content">${c.style||c.good}</div></div>`:''}
+      ${c.vocab||c.better?`<div class="ci-section"><div class="ci-slabel">◈ ${c.type==='writing'?'Vocabulary':'Original techniques'}</div><div class="ci-content">${c.vocab||c.better}</div></div>`:''}
+    </div>`).join('');
+}
+
+function deleteCorrection(id) {
+  S.corrections=S.corrections.filter(c=>c.id!==id);
+  save(); renderCorrections();
+}
+function clearAll() {
+  if(!confirm('Clear all data?'))return;
+  S.sessions=[];S.corrections=[];S.streak=0;S.lastDate=null;
+  save(); renderProgress(); updateHeader();
+}
+
+// ─── STREAK ──────────────────────────────────────────────
+function bumpStreak() {
+  const today=new Date().toDateString();
+  if(S.lastDate!==today){
+    const yest=new Date(Date.now()-86400000).toDateString();
+    S.streak=S.lastDate===yest?(S.streak||0)+1:1;
+    S.lastDate=today;
+  }
+  renderStreak();
+}
+function renderStreak() {
+  const n=Math.min(S.streak||0,7);
+  document.getElementById('streakDots').innerHTML=Array.from({length:7},(_,i)=>
+    `<div class="s-dot ${i<n?'on':''}"></div>`).join('');
+  document.getElementById('streakLabel').textContent=`${S.streak||0} day streak`;
+}
+function updateHeader() {
+  document.getElementById('hBadge').textContent=`Session ${S.sessions.length+1}`;
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+async function init() {
+  load();
+  API_KEY = loadKey();
+  renderTopicChips();
+  renderStreak();
+  updateHeader();
+  setTimeout(()=>document.getElementById('splash').classList.add('out'), 900);
+  if (!API_KEY) {
+    setTimeout(()=>document.getElementById('keyOverlay').classList.remove('hidden'), 1000);
+  } else {
+    generatePrompt();
+    generateImitationText();
+  }
+}
+init();
+</script>
+
+</body>
+</html>
